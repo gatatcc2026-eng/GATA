@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Portal do Professor — GATA · Univap</title>
+
+    <link rel="icon" href="assets/logo-univap.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+
+    <style>
+
+        /* RESET */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* VARIÁVEIS */
+        :root {
+            --azul: #1a3a8a;
+            --azul-medio: #2e58a5;
+            --azul-claro: #eef2f9;
+            --cinza: #6b7280;
+            --borda: #d1d5db;
+            --vermelho: #dc2626;
+            --vermelho-escuro: #b91c1c;
+            --verde: #16a34a;
+            --verde-escuro: #15803d;
+            --fundo: #f4f6fb;
+        }
+
+        /* BODY */
+        body { font-family: 'Lato', sans-serif; background: var(--fundo); color: #111827; min-height: 100vh; }
+
+        /* HEADER */
+        .header { height: 76px; padding: 0 32px; background: var(--azul); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .header-logo { display: flex; align-items: center; gap: 12px; }
+        .header-logo img.icone { width: 56px; height: 56px; object-fit: contain; }
+        .header-logo h1 { font-size: 21px; font-weight: 700; color: #fff; line-height: 1.15; }
+        .header-logo p { font-size: 13px; color: #fff; opacity: .85; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-user { font-size: .82rem; color: rgba(255, 255, 255, .75); }
+
+        /* BOTÃO SAIR */
+        .btn-sair { padding: 6px 14px; background: transparent; border: 1.5px solid rgba(255, 255, 255, .3); border-radius: 7px; color: rgba(255, 255, 255, .8); font-family: 'Lato', sans-serif; font-size: .78rem; font-weight: 700; cursor: pointer; letter-spacing: .04em; transition: background .2s ease, border-color .2s ease, color .2s ease; }
+        .btn-sair:hover { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .6); color: #fff; }
+
+        /* MAIN */
+        .main { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+        /* CARD DE INFORMAÇÕES */
+        .card-info { background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 20px 24px; display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, .03); }
+        .info-item { display: flex; flex-direction: column; gap: 2px; }
+        .info-label { font-size: .68rem; font-weight: 700; color: var(--cinza); letter-spacing: .07em; text-transform: uppercase; }
+        .info-valor { font-size: .95rem; font-weight: 700; color: var(--azul); }
+
+        /* FILTROS */
+        .filtro-row { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+        .filtro-grupo { display: flex; align-items: center; gap: 8px; }
+        .filtro-grupo label { font-size: .78rem; font-weight: 700; color: #374151; letter-spacing: .06em; text-transform: uppercase; }
+        .filtro-grupo select { padding: 8px 14px; border: 1.5px solid var(--borda); border-radius: 8px; font-family: 'Lato', sans-serif; font-size: .85rem; color: #111827; background: #fff; outline: none; cursor: pointer; transition: border-color .2s ease, box-shadow .2s ease; }
+        .filtro-grupo select:focus { border-color: var(--azul-medio); box-shadow: 0 0 0 3px rgba(46, 88, 165, .1); }
+
+        /* BOTÃO CONTESTAÇÕES */
+        .btn-contestacoes { padding: 8px 14px; background: var(--azul); color: #fff; border: 1px solid var(--azul); border-radius: 8px; font-family: 'Lato', sans-serif; font-size: .78rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+        .btn-contestacoes:hover { background: var(--azul-medio); border-color: var(--azul-medio); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(26, 58, 138, .15); }
+        .btn-contestacoes:active { transform: translateY(0); box-shadow: none; }
+
+        /* TABELA */
+        .card-tabela { background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, .03); }
+        .tabela-wrapper { width: 100%; overflow-x: auto; }
+        .tabela-notas { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .tabela-notas th { background: var(--azul-claro); color: var(--azul); font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 10px 14px; text-align: left; white-space: nowrap; }
+        .tabela-notas td { padding: 10px 8px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+        .tabela-notas tr:last-child td { border-bottom: none; }
+        .tabela-notas tr:hover td { background: #fafafa; }
+
+        /* MENSAGENS NA TABELA */
+        .celula-mensagem { text-align: center; color: var(--cinza); padding: 20px; }
+        .celula-erro { color: var(--vermelho); }
+
+        /* AVISO DE NOTAS FECHADAS */
+        .aviso-notas-fechadas { background: #fef2f2; border: 1px solid #fecaca; color: var(--vermelho-escuro); padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 700; }
+
+        /* INPUT DE NOTA */
+        .input-nota { width: 60px; padding: 6px; border: 1.5px solid var(--borda); border-radius: 7px; font-family: 'Lato', sans-serif; font-size: .88rem; color: #111827; background: #fafafa; outline: none; text-align: center; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+        .input-nota:focus { border-color: var(--azul-medio); background: #fff; box-shadow: 0 0 0 3px rgba(46, 88, 165, .1); }
+
+        /* BOTÃO SALVAR */
+        .btn-salvar { width: 100%; padding: 13px; background: var(--azul); color: #fff; border: 1px solid var(--azul); border-radius: 9px; font-family: 'Lato', sans-serif; font-size: .92rem; font-weight: 700; letter-spacing: .04em; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+        .btn-salvar:hover { background: var(--azul-medio); border-color: var(--azul-medio); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(26, 58, 138, .15); }
+        .btn-salvar:active { transform: translateY(0); box-shadow: none; }
+        .btn-salvar:disabled { background: #9ca3af; border-color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* GRÁFICO */
+        .card-grafico { background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 22px 24px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, .03); }
+        .grafico-cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+        .grafico-cabecalho h2 { color: var(--azul); font-size: 1.15rem; margin-bottom: 4px; }
+        .grafico-cabecalho p { color: var(--cinza); font-size: .82rem; }
+        .grafico-media { min-width: 150px; padding: 10px 14px; background: var(--azul-claro); border: 1px solid #dbe3f0; border-radius: 9px; text-align: center; }
+        .grafico-media span { display: block; color: var(--cinza); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+        .grafico-media strong { display: block; color: var(--azul); font-size: 1.25rem; }
+        .grafico-wrapper { position: relative; width: 100%; height: 350px; }
+        #graficoNotas { width: 100% !important; height: 100% !important; }
+
+        /* MODAL CONTESTAÇÕES */
+        .modal-contestacoes-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 9999; }
+        .modal-contestacoes { width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 28px; position: relative; box-shadow: 0 20px 50px rgba(0, 0, 0, .2); }
+        .modal-contestacoes h2 { color: var(--azul); margin-bottom: 6px; font-size: 1.35rem; }
+        .modal-contestacoes-subtitulo { color: var(--cinza); margin-bottom: 20px; font-size: .9rem; }
+        .modal-contestacoes-fechar { position: absolute; top: 12px; right: 16px; border: none; background: transparent; font-size: 30px; line-height: 1; color: #6b7280; cursor: pointer; }
+        .modal-contestacoes-fechar:hover { color: #111827; }
+        .lista-contestacoes { display: flex; flex-direction: column; gap: 16px; }
+        .contestacao-card { border: 1px solid var(--borda); border-radius: 10px; padding: 18px; background: #fafafa; }
+        .contestacao-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+        .contestacao-topo strong { display: block; color: #111827; margin-bottom: 4px; }
+        .contestacao-topo span { display: block; font-size: .8rem; color: var(--cinza); }
+
+        /* STATUS */
+        .status-contestacao { display: inline-flex; align-items: center; justify-content: center; min-width: 90px; padding: 6px 12px; border-radius: 20px; font-size: .75rem !important; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+        .status-pendente { background: #fef3c7; color: #92400e !important; border-color: #fde68a; }
+        .status-aprovada { background: #dcfce7; color: #166534 !important; border-color: #bbf7d0; }
+        .status-recusada { background: #fee2e2; color: #991b1b !important; border-color: #fecaca; }
+
+        .contestacao-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .contestacao-info div { font-size: .85rem; color: #374151; }
+        .contestacao-motivo { padding: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 14px; }
+        .contestacao-motivo strong { color: var(--azul); }
+        .contestacao-motivo p { margin-top: 8px; color: #374151; line-height: 1.5; white-space: pre-wrap; }
+        .contestacao-resposta { padding: 14px; background: var(--azul-claro); border: 1px solid #dbe3f0; border-radius: 8px; margin-bottom: 14px; }
+        .contestacao-resposta strong { color: var(--azul); }
+        .contestacao-resposta p { margin-top: 8px; color: #374151; line-height: 1.5; white-space: pre-wrap; }
+        .contestacao-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+        .contestacao-acoes button { border-radius: 8px; padding: 8px 14px; font-family: 'Lato', sans-serif; font-size: .78rem; font-weight: 700; cursor: pointer; }
+        .btn-aprovar { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .btn-recusar { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* MODAL RESPOSTA */
+        .modal-resposta-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 10000; }
+        .modal-resposta { width: 100%; max-width: 600px; background: #fff; border-radius: 14px; padding: 28px; position: relative; box-shadow: 0 20px 50px rgba(0, 0, 0, .2); }
+        .modal-resposta-fechar { position: absolute; top: 12px; right: 16px; border: none; background: transparent; color: #6b7280; font-size: 30px; line-height: 1; cursor: pointer; }
+        .modal-resposta-cabecalho { margin-bottom: 22px; }
+        .modal-resposta-cabecalho h2 { color: var(--azul); font-size: 1.35rem; margin-bottom: 6px; }
+        .modal-resposta-cabecalho p { color: var(--cinza); font-size: .88rem; }
+        .modal-resposta-conteudo { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+        .modal-resposta-conteudo label { font-size: .78rem; font-weight: 700; color: #374151; text-transform: uppercase; }
+        .modal-resposta-conteudo textarea { width: 100%; min-height: 140px; resize: vertical; padding: 12px 14px; border: 1.5px solid var(--borda); border-radius: 8px; font-family: 'Lato', sans-serif; font-size: .9rem; outline: none; }
+        .modal-resposta-conteudo textarea:focus { border-color: var(--azul-medio); box-shadow: 0 0 0 3px rgba(46, 88, 165, .1); }
+        .modal-resposta-acoes { display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-resposta-cancelar, .btn-resposta-enviar { padding: 9px 16px; border-radius: 8px; font-family: 'Lato', sans-serif; font-size: .8rem; font-weight: 700; cursor: pointer; }
+        .btn-resposta-cancelar { background: #fff; color: #374151; border: 1px solid var(--borda); }
+        .btn-resposta-enviar { background: var(--azul); color: #fff; border: 1px solid var(--azul); }
+        .resposta-aprovar { background: var(--verde); border-color: var(--verde); }
+        .resposta-recusar { background: var(--vermelho); border-color: var(--vermelho); }
+
+        /* RODAPÉ */
+        .rodape { margin-top: 32px; text-align: center; font-size: .72rem; color: #9ca3af; }
+        .rodape span { color: var(--azul-medio); font-weight: 700; }
+
+        /* RESPONSIVO */
+        @media (max-width: 700px) {
+            .header { padding: 0 18px; }
+            .header-user { display: none; }
+            .main { padding: 24px 16px; }
+            .card-info { gap: 16px; padding: 18px; }
+            .filtro-row { flex-direction: column; align-items: flex-start; }
+            .filtro-grupo { width: 100%; flex-wrap: wrap; }
+            .filtro-grupo select { max-width: 100%; }
+            .card-tabela { padding: 16px; }
+            .grafico-cabecalho { flex-direction: column; align-items: stretch; }
+            .grafico-media { width: 100%; }
+            .grafico-wrapper { height: 280px; }
+            .contestacao-info { grid-template-columns: 1fr; }
+            .contestacao-topo { flex-direction: column; }
+            .modal-contestacoes { padding: 20px; }
+            .modal-resposta { padding: 22px; }
+        }
+
+        @media (max-width: 450px) {
+            .header-logo img.icone { width: 46px; height: 46px; }
+            .header-logo h1 { font-size: 17px; }
+            .header-logo p { font-size: 11px; }
+            .main { padding: 20px 12px; }
+            .filtro-grupo { flex-direction: column; align-items: flex-start; }
+            .filtro-grupo select { width: 100%; }
+            .contestacao-acoes { flex-direction: column; align-items: stretch; }
+            .contestacao-acoes button { width: 100%; }
+            .modal-resposta-acoes { flex-direction: column-reverse; }
+            .btn-resposta-cancelar, .btn-resposta-enviar { width: 100%; }
+        }
+
+
+/* ===== EASTER EGG "Sobre o GATA" (compartilhado: aluno e professor) ===== */
+
+/* Logo clicável: sem cara de botão, só reage de leve */
+.egg-logo {
+    cursor: pointer;
+    transition: transform .25s ease, filter .25s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.egg-logo:hover {
+    transform: rotate(-6deg) scale(1.08);
+    filter: drop-shadow(0 0 6px rgba(255,255,255,.55));
+}
+
+.egg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: rgba(15,23,42,.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    font-family: "Lato", sans-serif;
+}
+
+.egg-overlay.aberto { opacity: 1; pointer-events: auto; }
+
+.egg-modal {
+    position: relative;
+    width: min(640px, 100%);
+    max-height: 92vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 18px;
+    padding: 30px 28px 26px;
+    box-shadow: 0 25px 70px rgba(0,0,0,.3);
+    transform: translateY(14px) scale(.97);
+    transition: transform .25s ease;
+    text-align: center;
+}
+
+.egg-overlay.aberto .egg-modal { transform: none; }
+
+.egg-fechar {
+    position: absolute;
+    top: 13px;
+    right: 15px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.egg-fechar:hover { background: #e2e8f0; }
+
+.egg-tag {
+    display: inline-block;
+    background: #eef2f9;
+    color: #1a3a8a;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.egg-modal h2 { color: #1a3a8a; font-size: 26px; margin-bottom: 10px; }
+
+.egg-texto {
+    color: #4b5563;
+    line-height: 1.65;
+    font-size: 14.5px;
+    max-width: 520px;
+    margin: 0 auto 26px;
+}
+
+.egg-grupo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: 50% 32%;
+    border-radius: 14px;
+    margin: 0 auto 26px;
+    box-shadow: 0 8px 22px rgba(26,58,138,.18);
+}
+
+.egg-equipe {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 22px;
+}
+
+.egg-membro { width: 130px; }
+
+.egg-foto {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #eef2f9;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #1a3a8a, 0 6px 16px rgba(26,58,138,.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a3a8a;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.egg-foto img { width: 100%; height: 100%; object-fit: cover; }
+
+.egg-membro strong { display: block; color: #1f2937; font-size: 14px; }
+.egg-membro span { display: block; color: #6b7280; font-size: 12px; margin-top: 2px; }
+
+.egg-membro strong a { color: inherit; text-decoration: none; }
+    .egg-membro strong a:hover { color: #1a3a8a; text-decoration: underline; }
+
+.egg-rodape {
+    margin-top: 26px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+@media (max-width: 700px) {
+    .egg-modal { padding: 26px 18px 20px; }
+    .egg-equipe { gap: 16px; }
+    .egg-membro { width: 105px; }
+    .egg-foto { width: 80px; height: 80px; font-size: 25px; }
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <header class="header">
+
+        <div class="header-logo">
+            <img class="icone" id="logoEgg" src="assets/logo-univap.png" alt="Univap">
+
+            <div>
+                <h1>Portal do Professor</h1>
+                <p>GATA · Univap</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+
+            <button type="button" class="btn-sair" id="btnSair">Sair</button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN
+    ========================================================== -->
+
+    <main class="main">
+
+        <!-- INFORMAÇÕES -->
+
+        <div class="card-info">
+
+            <div class="info-item">
+                <span class="info-label">Professor</span>
+                <span class="info-valor" id="infoNome">—</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Turma</span>
+                <span class="info-valor" id="infoTurma">—</span>
+            </div>
+
+        </div>
+
+
+        <!-- FILTROS -->
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+
+                <label for="selectTurma">Turma:</label>
+
+                <select id="selectTurma">
+                    <option value="">Carregando...</option>
+                </select>
+
+            </div>
+
+            <div class="filtro-grupo">
+
+                <label for="filtroBimestre">Bimestre:</label>
+
+                <select id="filtroBimestre">
+                    <option value="todos">Todos</option>
+                    <option value="1º Bimestre">1º Bimestre</option>
+                    <option value="2º Bimestre">2º Bimestre</option>
+                    <option value="3º Bimestre">3º Bimestre</option>
+                    <option value="4º Bimestre">4º Bimestre</option>
+                </select>
+
+            </div>
+
+            <div class="filtro-grupo">
+
+                <label for="selectDisciplina">Disciplina:</label>
+
+                <select id="selectDisciplina"></select>
+
+                <button type="button" class="btn-contestacoes" id="btnContestacoes">
+                    Contestações
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABELA -->
+
+        <div class="card-tabela">
+
+            <div class="tabela-wrapper">
+
+                <table class="tabela-notas">
+
+                    <thead id="tabelaHead">
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Aluno</th>
+                            <th>Nota</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tabelaAlunos">
+                        <tr>
+                            <td colspan="6" class="celula-mensagem">Carregando...</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- SALVAR -->
+
+        <button type="button" class="btn-salvar" id="btnSalvarNotas">
+            Salvar Notas
+        </button>
+
+
+        <!-- GRÁFICO -->
+
+        <div class="card-grafico">
+
+            <div class="grafico-cabecalho">
+
+                <div>
+                    <h2>Desempenho dos alunos</h2>
+                    <p id="graficoSubtitulo">Distribuição das notas</p>
+                </div>
+
+                <div class="grafico-media">
+                    <span>Média da turma</span>
+                    <strong id="mediaTurma">—</strong>
+                </div>
+
+            </div>
+
+            <div class="grafico-wrapper">
+                <canvas id="graficoNotas"></canvas>
+            </div>
+
+        </div>
+
+
+        <!-- RODAPÉ -->
+
+        <div class="rodape">
+            GATA &nbsp;·&nbsp; <span>Univap</span> &nbsp;·&nbsp; 2026
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         MODAL CONTESTAÇÕES
+    ========================================================== -->
+
+    <div id="modalContestacoes" class="modal-contestacoes-overlay" style="display: none;">
+
+        <div class="modal-contestacoes" role="dialog" aria-modal="true" aria-labelledby="tituloContestacoes">
+
+            <button type="button" class="modal-contestacoes-fechar" id="btnFecharContestacoes" aria-label="Fechar">
+                ×
+            </button>
+
+            <h2 id="tituloContestacoes">Contestações de Notas</h2>
+
+            <p class="modal-contestacoes-subtitulo">
+                Solicitações dos alunos para suas disciplinas
+            </p>
+
+            <div id="listaContestacoes" class="lista-contestacoes"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MODAL RESPOSTA
+    ========================================================== -->
+
+    <div id="modalRespostaContestacao" class="modal-resposta-overlay" style="display: none;">
+
+        <div class="modal-resposta" role="dialog" aria-modal="true" aria-labelledby="tituloRespostaContestacao">
+
+            <button type="button" class="modal-resposta-fechar" id="btnFecharResposta" aria-label="Fechar">
+                ×
+            </button>
+
+            <div class="modal-resposta-cabecalho">
+
+                <h2 id="tituloRespostaContestacao">Responder Contestação</h2>
+
+                <p id="descricaoRespostaContestacao">Escreva uma resposta para o aluno.</p>
+
+            </div>
+
+            <div class="modal-resposta-conteudo">
+
+                <label for="textoRespostaContestacao">Resposta</label>
+
+                <textarea id="textoRespostaContestacao" placeholder="Digite a resposta para o aluno..." rows="6"></textarea>
+
+            </div>
+
+            <div class="modal-resposta-acoes">
+
+                <button type="button" class="btn-resposta-cancelar" id="btnCancelarResposta">
+                    Cancelar
+                </button>
+
+                <button type="button" id="btnEnviarRespostaContestacao" class="btn-resposta-enviar">
+                    Enviar resposta
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TEMPLATES (o JS só clona e preenche; campos via data-campo)
+    ========================================================== -->
+
+    <!-- Linha de mensagem na tabela (carregando / vazio / erro) -->
+    <template id="tpl-linha-mensagem">
+        <tr>
+            <td colspan="6" class="celula-mensagem" data-campo="texto"></td>
+        </tr>
+    </template>
+
+    <!-- Cabeçalho da tabela de notas (colunas fixas) -->
+    <template id="tpl-cabecalho-notas">
+        <tr>
+            <th>Matrícula</th>
+            <th>Aluno</th>
+        </tr>
+    </template>
+
+    <!-- Coluna de bimestre no cabeçalho -->
+    <template id="tpl-th-bimestre">
+        <th data-campo="titulo"></th>
+    </template>
+
+    <!-- Linha de aluno (colunas fixas) -->
+    <template id="tpl-linha-aluno">
+        <tr>
+            <td data-campo="matricula"></td>
+            <td data-campo="nome"></td>
+        </tr>
+    </template>
+
+    <!-- Célula de nota -->
+    <template id="tpl-celula-nota">
+        <td>
+            <input type="number" min="0" max="10" step="0.1" class="input-nota">
+        </td>
+    </template>
+
+    <!-- Aviso de notas fechadas -->
+    <template id="tpl-aviso-notas-fechadas">
+        <div id="avisoNotasFechadas" class="aviso-notas-fechadas">
+            As notas deste curso foram fechadas pelo coordenador. Não é possível lançar ou alterar notas.
+        </div>
+    </template>
+
+    <template id="tpl-contestacao-card">
+
+        <div class="contestacao-card">
+
+            <div class="contestacao-topo">
+
+                <div>
+                    <strong data-campo="aluno"></strong>
+                    <span data-campo="matricula"></span>
+                </div>
+
+                <span class="status-contestacao" data-campo="status"></span>
+
+            </div>
+
+            <div class="contestacao-info">
+
+                <div><strong>Turma:</strong> <span data-campo="turma"></span></div>
+
+                <div><strong>Disciplina:</strong> <span data-campo="disciplina"></span></div>
+
+                <div><strong>Bimestre:</strong> <span data-campo="bimestre"></span></div>
+
+                <div><strong>Data:</strong> <span data-campo="data"></span></div>
+
+                <div><strong>Nota contestada:</strong> <span data-campo="notaAnterior"></span></div>
+
+                <div data-bloco="nota-atual"><strong>Nota atual:</strong> <span data-campo="notaAtual"></span></div>
+
+            </div>
+
+            <div class="contestacao-motivo">
+                <strong>Motivo da contestação:</strong>
+                <p data-campo="motivo"></p>
+            </div>
+
+            <div class="contestacao-resposta">
+                <strong>Sua resposta:</strong>
+                <p data-campo="resposta"></p>
+            </div>
+
+            <div class="contestacao-acoes">
+
+                <button type="button" class="btn-aprovar" data-acao="alterar">
+                    Alterar Nota
+                </button>
+
+                <button type="button" class="btn-recusar" data-acao="recusar">
+                    Recusar
+                </button>
+
+            </div>
+
+        </div>
+
+    </template>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="popup.css">
+
+    <script src="popup.js"></script>
+
+    <script type="module" src="professor.js"></script>
+
+    <!-- Easter egg (clique no logo) -->
+    <script>
+/* EASTER EGG "Sobre o GATA": monta o modal sozinho e liga ao logo do cabecalho (#logoEgg). */
+(function () {
+
+    var EQUIPE = [
+        { nome: "Ana Clara de Araujo Pimenta",   foto: "assets/AnaPimenta.jpg", instagram: "@api_menta" },
+        { nome: "João Ronaldo Oliveira Batista", foto: "assets/ronaldo.jpg",    instagram: "@r_joaor" },
+        { nome: "João Vitor Da Silva Binotto",   foto: "assets/binotto.jpg",    instagram: "@joao_binotto17" }
+    ];
+
+    var FOTO_GRUPO = "assets/juntos.jpg";
+
+    var TEXTO =
+        "O GATA é um sistema de gestão acadêmica escolar desenvolvido como Trabalho de " +
+        "Conclusão de Curso. Ele conecta alunos, professores e coordenação em um só lugar: " +
+        "lançamento e consulta de notas, contestações com resposta do professor, " +
+        "relatórios e muito mais.";
+
+    function escapar(txt) {
+        var d = document.createElement("div");
+        d.textContent = txt == null ? "" : txt;
+        return d.innerHTML;
+    }
+
+    function linkInstagram(v) {
+        if (!v) return "";
+        v = String(v).trim();
+        if (/^https?:\/\//i.test(v)) return v.replace(/"/g, "%22");
+        return "https://www.instagram.com/" + encodeURIComponent(v.replace(/^@/, "").replace(/\/+$/, "")) + "/";
+    }
+
+    function nomeHtml(m) {
+        var url = linkInstagram(m.instagram);
+        return url
+            ? '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Instagram">' + escapar(m.nome) + '</a>'
+            : escapar(m.nome);
+    }
+
+    function iniciar() {
+
+        if (document.getElementById("eggOverlay")) return;
+
+        var logo = document.getElementById("logoEgg") ||
+                   document.querySelector(".logo-area img") ||
+                   document.querySelector("header img");
+
+        if (!logo) return;
+
+        logo.classList.add("egg-logo");
+
+        var membros = EQUIPE.map(function (m) {
+            var inicial = escapar(m.nome.charAt(0).toUpperCase());
+            return '<div class="egg-membro">' +
+                       '<div class="egg-foto">' +
+                           '<img src="' + escapar(m.foto) + '" alt="' + escapar(m.nome) + '" ' +
+                           'onerror="this.parentNode.textContent=\'' + inicial + '\'">' +
+                       '</div>' +
+                       '<strong>' + nomeHtml(m) + '</strong>' +
+                       (m.papel ? '<span>' + escapar(m.papel) + '</span>' : '') +
+                   '</div>';
+        }).join("");
+
+        var overlay = document.createElement("div");
+        overlay.className = "egg-overlay";
+        overlay.id = "eggOverlay";
+        overlay.setAttribute("aria-hidden", "true");
+
+        overlay.innerHTML =
+            '<div class="egg-modal" role="dialog" aria-modal="true" aria-labelledby="eggTitulo">' +
+                '<button type="button" class="egg-fechar" id="eggFechar" aria-label="Fechar">&times;</button>' +
+                '<span class="egg-tag">TCC · Univap</span>' +
+                '<h2 id="eggTitulo">Sobre o GATA</h2>' +
+                '<p class="egg-texto">' + escapar(TEXTO) + '</p>' +
+                '<img class="egg-grupo" src="' + escapar(FOTO_GRUPO) + '" alt="Equipe do GATA" ' +
+                    'onerror="this.style.display=\'none\'">' +
+                '<div class="egg-equipe">' + membros + '</div>' +
+                '<div class="egg-rodape">Feito com dedicação (e muito café) por estudantes da Univap.</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        function abrir() {
+            overlay.classList.add("aberto");
+            overlay.setAttribute("aria-hidden", "false");
+        }
+
+        function fechar() {
+            overlay.classList.remove("aberto");
+            overlay.setAttribute("aria-hidden", "true");
+        }
+
+        logo.addEventListener("click", abrir);
+        overlay.querySelector("#eggFechar").addEventListener("click", fechar);
+
+        overlay.addEventListener("click", function (e) {
+            if (e.target === overlay) fechar();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") fechar();
+        });
+
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", iniciar);
+    } else {
+        iniciar();
+    }
+
+})();
+    </script>
+<script type="module" src="contestacoesBadge.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,2663 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Coordenador - GATA</title>
+    <link rel="icon" href="assets/logo-univap.png">
+
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="coordenador.css"
+    >
+
+
+    <!-- Estilos da edição de disciplina (antes eram injetados pelo JS).
+         Se preferir, mova este bloco para o coordenador.css. -->
+    <style id="estilosDisciplina">
+
+        .containerTurmasProfessor {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .linhaTurmaProfessor {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btnAdicionarTurmaProfessor {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: max-content;
+            margin-top: 4px;
+            padding: 6px 12px;
+            border: 1px dashed #1a3a8a;
+            border-radius: 6px;
+            background: #eef2f9;
+            color: #1a3a8a;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btnAdicionarTurmaProfessor:hover {
+            border-style: solid;
+            background: #1a3a8a;
+            color: #ffffff;
+        }
+
+        .btnExcluirTurmaProfessor {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            background: #dc3545;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btnExcluirTurmaProfessor:hover {
+            background: #b02a37;
+            transform: translateY(-1px);
+        }
+
+    </style>
+
+
+    <!-- Estilos dos checkboxes (todos os checkboxes do painel) -->
+    <style id="estilosCheckbox">
+
+        /* Checkbox personalizado */
+        .conteudo input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            display: inline-grid;
+            place-content: center;
+            flex: none;
+            box-sizing: border-box;
+            width: 18px !important;
+            min-width: 18px;
+            height: 18px !important;
+            margin: 0;
+            padding: 0 !important;
+            border: 2px solid #9aa8c7;
+            border-radius: 5px;
+            background: #ffffff;
+            vertical-align: middle;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .conteudo input[type="checkbox"]:hover {
+            border-color: #1a3a8a;
+        }
+
+        .conteudo input[type="checkbox"]:checked {
+            border-color: #1a3a8a;
+            background: #1a3a8a url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L19 7'/></svg>") center / 12px no-repeat;
+        }
+
+        .conteudo input[type="checkbox"]:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 58, 138, 0.25);
+        }
+
+        .conteudo input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Rótulo em formato de "chip" */
+        .conteudo label.chip-check {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            padding: 6px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 999px;
+            background: #ffffff;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 400;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .conteudo label.chip-check:hover {
+            border-color: #1a3a8a;
+            background: #f5f8ff;
+        }
+
+        .conteudo label.chip-check:has(input:checked) {
+            border-color: #1a3a8a;
+            background: #eef2f9;
+            color: #1a3a8a;
+            font-weight: 700;
+        }
+
+        /* "Marcar todas" */
+        .conteudo label.chip-check-todas {
+            width: max-content;
+            margin: 0 0 10px;
+            border-color: #1a3a8a;
+            color: #1a3a8a;
+            font-weight: 700;
+        }
+
+        /* Lista de turmas de cada professor (cadastro de disciplina) */
+        .lista-turmas-professor {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SINO DE HISTÓRICO DO COORDENADOR
+===================================================== -->
+
+<button id="btnSinoHistorico" class="sino-historico" type="button" title="Histórico do coordenador">
+
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+            d="M12 2C10.3 2 9 3.3 9 5v.6C6.1 6.6 4 9.3 4 12.5V17l-1.6 2.1c-.4.5 0 1.2.6 1.2h18c.6 0 1-.7.6-1.2L20 17v-4.5c0-3.2-2.1-5.9-5-6.9V5c0-1.7-1.3-3-3-3z"
+            fill="currentColor"
+        />
+        <path
+            d="M9.5 20.5c.3 1 1.3 1.7 2.5 1.7s2.2-.7 2.5-1.7h-5z"
+            fill="currentColor"
+        />
+    </svg>
+
+    <span id="badgeHistorico" class="badge-historico" style="display:none;">0</span>
+
+</button>
+
+
+<!-- =====================================================
+     MENU LATERAL
+===================================================== -->
+
+<aside class="menu">
+
+
+    <h2>GATA</h2>
+
+
+    <ul class="menu-principal">
+
+
+        <!-- =================================================
+             ADM
+        ================================================== -->
+
+        <li class="grupo-menu">
+
+
+            <button class="btn-grupo-menu" id="btnAdm" type="button">
+
+                <span class="grupo-texto">
+                    ADM
+                </span>
+
+                <span class="seta">
+                    ▾
+                </span>
+
+                <span id="badgeAdm" class="badge-menu" style="display:none"></span>
+
+            </button>
+
+
+            <ul class="submenu">
+
+
+                <li>
+                    <button id="btnProfessores" type="button">
+                        Professores
+                    </button>
+                </li>
+
+
+                <li>
+                    <button id="btnAlunos" type="button">
+                        Alunos
+                    </button>
+                </li>
+
+
+                <li>
+                    <button id="btnCursos" type="button">
+                        Cursos
+                    </button>
+                </li>
+
+
+                <li>
+                    <button id="btnDisciplinas" type="button">
+                        Disciplinas
+                    </button>
+                </li>
+
+
+                <li>
+                    <button id="btnTurmas" type="button">
+                        Turmas
+                    </button>
+                </li>
+
+
+                <li>
+                    <button id="btnSolicitacoes" type="button">
+                        Solicitações de aluno
+                        <span id="badgeSolicitacoes" class="badge-menu" style="display:none"></span>
+                    </button>
+                </li>
+
+                <li>
+                    <button id="btnSolicitacoesProfessor" type="button">
+                        Solicitações de professor
+                        <span id="badgeSolicitacoesProfessor" class="badge-menu" style="display:none"></span>
+                    </button>
+                </li>
+
+
+            </ul>
+
+
+        </li>
+
+
+
+        <!-- =================================================
+             LECIONAR
+        ================================================== -->
+
+        <li class="grupo-menu">
+
+
+            <button
+                class="btn-grupo-menu"
+                id="btnLecionar"
+                type="button"
+            >
+
+                <span class="grupo-texto">
+                    LECIONAR
+                </span>
+
+                <span class="seta">
+                    ▾
+                </span>
+
+            </button>
+
+
+            <ul class="submenu">
+
+                <li>
+                    <button id="btnLancarNotas" type="button">
+                        Lançar Notas
+                    </button>
+                </li>
+
+            </ul>
+
+
+        </li>
+
+
+
+        <!-- =================================================
+             VISUALIZAR
+        ================================================== -->
+
+        <li class="grupo-menu">
+
+
+            <button
+                class="btn-grupo-menu"
+                id="btnVisualizar"
+                type="button"
+            >
+
+                <span class="grupo-texto">
+                    VISUALIZAR
+                </span>
+
+                <span class="seta">
+                    ▾
+                </span>
+
+            </button>
+
+
+            <ul class="submenu">
+
+                <li>
+                    <button id="btnVisualizarNotas" type="button">
+                        Visualizar Notas
+                    </button>
+                </li>
+
+            </ul>
+
+
+        </li>
+
+        <!-- =====================================================
+            SAIR
+        ===================================================== -->
+
+        <li class="menu-sair">
+
+            <button
+                class="btn-sair"
+                type="button"
+                onclick="sair()"
+            >
+                Sair
+            </button>
+
+        </li>
+
+
+    </ul>
+
+
+</aside>
+
+
+
+<!-- =====================================================
+     CONTEÚDO PRINCIPAL
+===================================================== -->
+
+<main class="conteudo">
+
+
+    <header class="topo">
+
+        <h1>
+            Painel do Coordenador
+        </h1>
+
+        <p>
+            Sistema de gerenciamento acadêmico
+        </p>
+
+        <p id="nomeCursoCoordenado" style="font-weight:bold; color:#1e4fc7;"></p>
+
+    </header>
+
+    <section id="areaConteudo">
+
+        <div class="inicio-coordenador">
+
+            <h2>
+                Bem-vindo ao GATA
+            </h2>
+
+            <p>
+                Selecione uma opção no menu para começar.
+            </p>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<!-- =====================================================
+     MODAL: RESPONDER CONTESTAÇÃO
+===================================================== -->
+
+<div
+    id="modalRespostaContestacao"
+    class="modal-resposta-overlay"
+    style="display: none;"
+>
+
+    <div
+        class="modal-resposta"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloRespostaContestacao"
+    >
+
+        <button
+            type="button"
+            class="modal-resposta-fechar"
+            onclick="fecharModalRespostaContestacao()"
+            aria-label="Fechar"
+        >
+            ×
+        </button>
+
+
+        <div class="modal-resposta-cabecalho">
+
+            <h2 id="tituloRespostaContestacao">
+                Responder Contestação
+            </h2>
+
+            <p id="descricaoRespostaContestacao">
+                Escreva uma resposta para o aluno.
+            </p>
+
+        </div>
+
+
+        <div class="modal-resposta-conteudo">
+
+            <label for="textoRespostaContestacao">
+                Resposta
+            </label>
+
+            <textarea
+                id="textoRespostaContestacao"
+                placeholder="Digite a resposta para o aluno..."
+                rows="6"
+            ></textarea>
+
+        </div>
+
+
+        <div class="modal-resposta-acoes">
+
+            <button
+                type="button"
+                class="btn-resposta-cancelar"
+                onclick="fecharModalRespostaContestacao()"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                type="button"
+                id="btnEnviarRespostaContestacao"
+                class="btn-resposta-enviar"
+                onclick="enviarRespostaContestacao()"
+            >
+                Enviar resposta
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================================
+     TEMPLATES DAS TELAS
+     O coordenador.js só clona estes blocos e preenche os dados.
+     Elementos com data-campo="x" recebem o texto do campo x.
+     Elementos com data-anexar="x" recebem o texto do campo x depois
+     do conteúdo que já têm.
+===================================================================== -->
+
+
+<!-- ---------------------------------------------------------------------
+     GERAIS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-linha-vazia">
+    <tr>
+        <td></td>
+    </tr>
+</template>
+
+
+<template id="tpl-mensagem">
+    <p data-campo="texto"></p>
+</template>
+
+
+<template id="tpl-aviso">
+    <div class="card-aviso">
+        <strong data-campo="titulo"></strong>
+        <p data-campo="texto"></p>
+    </div>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     VISUALIZAR NOTAS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-visualizacao-notas">
+
+    <div class="card-notas">
+
+        <div class="cabecalho-tela">
+
+            <h2>
+                Visualização de Notas
+            </h2>
+
+            <p>
+                Consulte as notas dos alunos da turma.
+            </p>
+
+        </div>
+
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Turma
+                </label>
+
+                <select id="selectTurmaVisualizacao">
+
+                    <option value="">
+                        Selecione uma turma
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Bimestre
+                </label>
+
+                <select id="selectBimestreVisualizacao">
+
+                    <option value="">Todos</option>
+                    <option value="1º Bimestre">1º Bimestre</option>
+                    <option value="2º Bimestre">2º Bimestre</option>
+                    <option value="3º Bimestre">3º Bimestre</option>
+                    <option value="4º Bimestre">4º Bimestre</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Visualizar
+                </label>
+
+                <select id="selectModoVisualizacao">
+
+                    <option value="todas">Mostrar todas as disciplinas</option>
+                    <option value="media_final">Mostrar apenas a média final</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filtro-botoes">
+
+                <button id="btnBuscarVisualizacao" class="btn-buscar" type="button">
+                    Buscar
+                </button>
+
+                <button id="btnBaixarPDFVisualizacao" class="btn-pdf" type="button">
+                    Baixar PDF
+                </button>
+
+            </div>
+
+
+            <div
+                class="filtro-botoes-notas"
+                style="margin-left:auto; display:flex; gap:10px; align-items:flex-end;"
+            >
+
+                <button id="btnFecharNotas" class="btn-pdf" type="button">
+                    Fechar notas
+                </button>
+
+                <button id="btnLiberarNotas" class="btn-buscar" type="button">
+                    Liberar notas
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="resultadoVisualizacaoNotas">
+
+            <div class="inicio-coordenador">
+
+                <h2>
+                    Consulte as notas
+                </h2>
+
+                <p>
+                    Selecione uma turma e clique em Buscar.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-modal-senha-trava">
+
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;">
+
+        <div style="background:#fff;border-radius:16px;padding:28px;width:340px;max-width:90%;box-shadow:0 10px 40px rgba(0,0,0,.25);font-family:inherit;">
+
+            <h3 style="margin:0 0 6px;color:#0f172a;">Fechar notas</h3>
+
+            <p style="margin:0 0 16px;color:#6b7280;font-size:14px;">
+                Digite a sua senha de coordenador para travar o lançamento de notas pelos professores.
+            </p>
+
+            <input
+                id="inputSenhaTrava"
+                type="password"
+                placeholder="Senha"
+                autocomplete="current-password"
+                style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:18px;"
+            >
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+
+                <button id="btnCancelarTrava" type="button" class="btn-buscar" style="background:#6b7280;">
+                    Cancelar
+                </button>
+
+                <button id="btnConfirmarTrava" type="button" class="btn-pdf">
+                    Fechar notas
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<!-- Um bloco de tabela (um bimestre ou a média final).
+     O JS insere as colunas das disciplinas antes de "Média". -->
+<template id="tpl-bloco-notas">
+
+    <div class="bloco-bimestre">
+
+        <span class="tag-bimestre" data-campo="tag"></span>
+
+        <div class="tabela-wrapper">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nome</th>
+                        <th class="col-media" data-campo="tituloMedia"></th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     LANÇAR NOTAS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-consulta-notas">
+
+    <div class="card-notas">
+
+        <h2>Consulta de Notas</h2>
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo" id="grupoCursoNotas" style="display:none;">
+                <label>Curso</label>
+                <select id="selectCursoNotas"></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Turma</label>
+                <select id="selectTurma">
+                    <option value="">Selecione uma turma</option>
+                </select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Disciplina</label>
+                <select id="selectDisciplina"></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Bimestre</label>
+                <select id="selectBimestre">
+                    <option value="">Selecione um bimestre</option>
+                    <option value="todos">Todos os bimestres</option>
+                    <option value="1º Bimestre">1º Bimestre</option>
+                    <option value="2º Bimestre">2º Bimestre</option>
+                    <option value="3º Bimestre">3º Bimestre</option>
+                    <option value="4º Bimestre">4º Bimestre</option>
+                </select>
+            </div>
+
+            <button id="btnBuscarNotas" class="btn-buscar" type="button">Buscar</button>
+
+            <button id="btnVerContestacoes" class="btn-buscar" type="button">Contestações</button>
+
+        </div>
+
+        <div class="card-tabela">
+
+            <div class="tabela-wrapper">
+
+                <table class="tabela-notas">
+
+                    <thead id="theadNotas">
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Aluno</th>
+                            <th>Nota</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tbodyNotas">
+                        <tr>
+                            <td colspan="4">Selecione uma turma, uma disciplina e um bimestre</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <button id="btnSalvarNotas" class="btn-salvar" type="button" style="display:none">
+            Salvar Notas
+        </button>
+
+        <div class="card-grafico-notas" style="margin-top:24px;">
+
+            <div class="grafico-cabecalho">
+
+                <div>
+                    <h3>Distribuição de Notas</h3>
+                    <p id="graficoSubtitulo">Selecione uma turma e um bimestre</p>
+                </div>
+
+                <div class="media-turma-box">
+                    <span>Média da turma</span>
+                    <strong id="mediaTurma">—</strong>
+                </div>
+
+            </div>
+
+            <div style="position:relative; height:300px;">
+                <canvas id="graficoNotas"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-celula-nota">
+    <td>
+        <input
+            type="number"
+            min="0"
+            max="10"
+            step="0.1"
+            class="input-nota"
+        >
+    </td>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     SOLICITAÇÕES DE ALUNO (troca de curso)
+     Quem aprova: o coordenador do curso de DESTINO.
+--------------------------------------------------------------------- -->
+
+<template id="tpl-solicitacoes">
+
+    <div class="card-notas">
+
+        <h2>Solicitações de troca de curso</h2>
+
+        <p>
+            Alunos que outro coordenador quer transferir para o seu curso.
+        </p>
+
+        <div class="tabela-wrapper">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Aluno</th>
+                        <th>Curso de origem</th>
+                        <th>Turma de destino</th>
+                        <th>Solicitado por</th>
+                        <th>Data</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodySolicitacoesRecebidas"></tbody>
+
+            </table>
+
+        </div>
+
+
+        <h2 style="margin-top:32px;">Solicitações enviadas</h2>
+
+        <div class="tabela-wrapper">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Aluno</th>
+                        <th>Curso de destino</th>
+                        <th>Turma de destino</th>
+                        <th>Data</th>
+                        <th>Situação</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodySolicitacoesEnviadas"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-solicitacao-recebida">
+    <tr>
+        <td data-campo="matricula"></td>
+        <td data-campo="nomeAluno"></td>
+        <td data-campo="nomeCursoOrigem" data-padrao="—"></td>
+        <td data-campo="nomeTurmaDestino" data-padrao="—"></td>
+        <td data-campo="nomeSolicitante"></td>
+        <td data-campo="data"></td>
+        <td>
+            <span class="acoes-pendente">
+                <button class="btn-buscar btn-aceitar-solicitacao" type="button">
+                    Aceitar
+                </button>
+
+                <button class="btn-pdf btn-recusar-solicitacao" type="button">
+                    Recusar
+                </button>
+            </span>
+
+            <strong class="status-solicitacao" data-campo="status"></strong>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-linha-solicitacao-enviada">
+    <tr>
+        <td data-campo="matricula"></td>
+        <td data-campo="nomeAluno"></td>
+        <td data-campo="nomeCursoDestino" data-padrao="—"></td>
+        <td data-campo="nomeTurmaDestino" data-padrao="—"></td>
+        <td data-campo="data"></td>
+        <td>
+            <strong class="status-solicitacao" data-campo="status"></strong>
+        </td>
+    </tr>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     SOLICITAÇÕES DE PROFESSOR
+     Quem aprova: o coordenador do curso de ORIGEM.
+--------------------------------------------------------------------- -->
+
+<template id="tpl-solicitacoes-professor">
+
+    <div class="card-notas">
+
+        <h2>Solicitações de professor</h2>
+
+        <p>
+            Pedidos de outros coordenadores para adicionar ao curso deles
+            um professor que está no seu curso.
+        </p>
+
+        <div class="tabela-wrapper">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Professor</th>
+                        <th>Curso solicitante</th>
+                        <th>Solicitado por</th>
+                        <th>Data</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodySolicitacoesProfessorRecebidas"></tbody>
+
+            </table>
+
+        </div>
+
+
+        <h2 style="margin-top:32px;">Solicitações enviadas</h2>
+
+        <div class="tabela-wrapper">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Professor</th>
+                        <th>Curso de origem</th>
+                        <th>Data</th>
+                        <th>Situação</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodySolicitacoesProfessorEnviadas"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-solicitacao-prof-recebida">
+    <tr>
+        <td data-campo="registroProfessor"></td>
+        <td data-campo="nomeProfessor"></td>
+        <td data-campo="nomeCursoDestino" data-padrao="—"></td>
+        <td data-campo="nomeSolicitante"></td>
+        <td data-campo="data"></td>
+        <td>
+            <span class="acoes-pendente">
+                <button class="btn-buscar btn-aceitar-solicitacao" type="button">
+                    Aceitar
+                </button>
+
+                <button class="btn-pdf btn-recusar-solicitacao" type="button">
+                    Recusar
+                </button>
+            </span>
+
+            <strong class="status-solicitacao" data-campo="status"></strong>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-linha-solicitacao-prof-enviada">
+    <tr>
+        <td data-campo="registroProfessor"></td>
+        <td data-campo="nomeProfessor"></td>
+        <td data-campo="nomeCursoOrigem" data-padrao="—"></td>
+        <td data-campo="data"></td>
+        <td>
+            <strong class="status-solicitacao" data-campo="status"></strong>
+        </td>
+    </tr>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     PROFESSORES
+--------------------------------------------------------------------- -->
+
+<template id="tpl-lista-professores">
+
+    <div class="card-notas">
+
+        <h2>Gerenciamento de Professores</h2>
+
+        <button id="btnNovoProfessor" class="btn-buscar" type="button">
+            + Cadastrar Professor
+        </button>
+
+        <button id="btnAdicionarProfessorExistente" class="btn-buscar" type="button">
+            + Adicionar professor existente
+        </button>
+
+        <br><br>
+
+        <div class="card-tabela">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Coordena</th>
+                        <th>Cursos</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyProfessores"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-professor">
+    <tr>
+        <td data-campo="registro"></td>
+        <td data-campo="nome"></td>
+        <td data-campo="email1" data-padrao="-"></td>
+        <td data-campo="telefone1" data-padrao="-"></td>
+        <td data-campo="coordena" data-padrao="—"></td>
+        <td data-campo="cursos" data-padrao="—"></td>
+        <td>
+            <button class="btn-buscar btnEditarProfessor" type="button">Editar</button>
+            <button class="btn-pdf btnRemoverProfessorDoCurso" type="button">Remover do curso</button>
+            <button class="btn-excluir btnExcluirProfessor" type="button">Excluir</button>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-form-professor">
+
+    <div class="card-notas">
+
+        <h2>
+            Cadastrar Professor
+        </h2>
+
+        <p style="color:#6b7280;font-size:13px;">
+            O professor será cadastrado no seu curso. Se ele já tem cadastro
+            em outro curso, use "Adicionar professor existente" na tela de Professores.
+        </p>
+
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+                <label>Registro</label>
+                <input id="registroProfessor" type="number">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Nome</label>
+                <input id="nomeProfessor" type="text">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Email</label>
+                <input id="email1" type="email">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Telefone</label>
+                <input id="telefone1" type="text">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Senha</label>
+                <input id="senhaProfessor" type="password">
+            </div>
+
+            <div class="filtro-grupo">
+                <label class="chip-check">
+                    <input id="coordenadorProfessor" type="checkbox">
+                    Coordenador
+                </label>
+            </div>
+
+        </div>
+
+
+        <br>
+
+
+        <button id="btnSalvarProfessor" class="btn-salvar" type="button">
+            Salvar Professor
+        </button>
+
+        <button id="btnCancelarProfessor" class="btn-buscar" type="button">
+            Cancelar
+        </button>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-editar-professor">
+
+    <div class="card-notas">
+
+        <h2>
+            Editar Professor
+        </h2>
+
+
+        <div class="aviso-professor">
+
+            <strong>
+                ⚠️ Atenção
+            </strong>
+
+            <p>
+                O professor pode ser editado normalmente.
+                Para excluir um professor que possui
+                disciplinas vinculadas, primeiro transfira
+                ou remova esses vínculos.
+                Se ele atua em mais de um curso, use
+                "Remover do curso" em vez de excluir.
+            </p>
+
+        </div>
+
+
+        <br>
+
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+                <label>Registro</label>
+                <input id="editRegistroProfessor" type="number" disabled>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Nome</label>
+                <input id="editNomeProfessor" type="text">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Email</label>
+                <input id="editEmail1" type="email">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Telefone</label>
+                <input id="editTelefone1" type="text">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>
+                    Nova senha
+                    <small>
+                        (deixe em branco para manter a atual)
+                    </small>
+                </label>
+
+                <input
+                    id="editSenhaProfessor"
+                    type="password"
+                    placeholder="Deixe em branco para manter a senha atual"
+                >
+            </div>
+
+            <div class="filtro-grupo">
+
+                <label class="chip-check">
+                    <input id="editCoordenadorProfessor" type="checkbox">
+                    Coordenador
+                </label>
+
+                <small
+                    id="avisoCoordenadorEdicao"
+                    style="display:block;margin-top:6px;color:#6b7280;font-size:12px;"
+                ></small>
+
+            </div>
+
+        </div>
+
+
+        <br>
+
+
+        <button id="btnSalvarEdicaoProfessor" class="btn-salvar" type="button">
+            Salvar Alterações
+        </button>
+
+        <button id="btnCancelarEdicaoProfessor" class="btn-buscar" type="button">
+            Cancelar
+        </button>
+
+    </div>
+
+</template>
+
+
+<!-- Adicionar professor que já tem cadastro em outro curso
+     (gera uma solicitação para o coordenador do curso de origem) -->
+<template id="tpl-adicionar-professor-existente">
+
+    <div class="card-notas">
+
+        <h2>Adicionar professor existente</h2>
+
+        <p>
+            Busque um professor que já tem cadastro em outro curso.
+            O coordenador do curso de origem precisa aprovar o pedido
+            antes de ele entrar no seu curso.
+        </p>
+
+<div style="display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; margin-top:16px;">
+
+    <div>
+
+        <label for="buscaProfessorExistente" style="display:block; font-weight:bold; margin-bottom:6px;">
+            Nome ou registro
+        </label>
+
+        <input
+            id="buscaProfessorExistente"
+            type="text"
+            placeholder="Digite para buscar"
+            style="min-width:260px; height:40px; padding:0 12px; border:1px solid #ccc; border-radius:6px; background:#fff; font-size:14px; box-sizing:border-box;"
+        >
+
+    </div>
+
+    <button id="btnBuscarProfessorExistente" class="btn-buscar" type="button" style="height:40px; padding:0 22px;">
+        Buscar
+    </button>
+
+    <button id="btnVoltarProfessores" class="btn-buscar" type="button" style="height:40px; padding:0 22px;">
+        Voltar
+    </button>
+
+</div>
+
+        <br>
+
+        <div class="card-tabela">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Já está em</th>
+                        <th>Curso de origem</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyProfessoresDisponiveis"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-professor-disponivel">
+    <tr>
+        <td data-campo="registro"></td>
+        <td data-campo="nome"></td>
+        <td data-campo="email1" data-padrao="-"></td>
+        <td data-campo="cursos" data-padrao="—"></td>
+        <td>
+            <select class="selectCursoOrigem">
+                <option value="">Selecione o curso de origem</option>
+            </select>
+        </td>
+        <td>
+            <button class="btn-buscar btnSolicitarProfessor" type="button">
+                Solicitar
+            </button>
+        </td>
+    </tr>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     TURMAS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-lista-turmas">
+
+    <div class="card-notas">
+
+        <h2>
+            Gerenciamento de Turmas
+        </h2>
+
+
+        <button id="btnNovaTurma" class="btn-buscar" type="button">
+            + Cadastrar Turma
+        </button>
+
+
+        <br><br>
+
+
+        <div id="formTurma"></div>
+
+
+        <br>
+
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Ano
+                </label>
+
+                <select id="selectAnoTurma">
+                    <option value="">Todos os anos</option>
+                    <option value="1">1º Ano</option>
+                    <option value="2">2º Ano</option>
+                    <option value="3">3º Ano</option>
+                </select>
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Curso
+                </label>
+
+                <select id="selectCursoTurma">
+                    <option value="">Todos os cursos</option>
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <br><br>
+
+
+        <div class="card-tabela">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Turma</th>
+                        <th>Curso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyTurmas"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-turma">
+    <tr>
+        <td data-campo="idTurma"></td>
+        <td data-campo="nomeTurma" data-padrao="Não informado"></td>
+        <td data-campo="nomeCurso" data-padrao="Não informado"></td>
+        <td>
+            <button class="btn-buscar btnEditarTurma" title="Editar turma">
+                Editar
+            </button>
+
+            <button class="btn-excluir btnExcluirTurma" title="Excluir turma">
+                Excluir
+            </button>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-form-turma">
+
+    <div class="card-formulario">
+
+        <h2>
+            Cadastrar Turma
+        </h2>
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Nome da Turma
+                </label>
+
+                <input id="nomeTurma" type="text" placeholder="Ex.: 3DS">
+
+            </div>
+
+        </div>
+
+        <div class="acoes-formulario">
+
+            <button id="btnSalvarTurma" class="btn-salvar" type="button">
+                Salvar Turma
+            </button>
+
+            <button id="btnCancelarTurma" class="btn-cancelar" type="button">
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-editar-turma">
+
+    <hr>
+
+    <h3>
+        Editar Turma
+    </h3>
+
+
+    <div class="filtro-row">
+
+        <div class="filtro-grupo">
+            <label>ID Turma</label>
+            <input id="editIdTurma" type="number" disabled>
+        </div>
+
+        <div class="filtro-grupo">
+            <label>Nome da Turma</label>
+            <input id="editNomeTurma" type="text">
+        </div>
+
+    </div>
+
+
+    <button id="btnSalvarEdicaoTurma" class="btn-salvar" type="button">
+        Salvar Alterações
+    </button>
+
+    <button id="btnCancelarEdicaoTurma" class="btn-buscar" type="button">
+        Cancelar
+    </button>
+
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     DISCIPLINAS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-lista-disciplinas">
+
+    <div class="card-notas">
+
+        <h2>Gerenciamento de Disciplinas</h2>
+
+        <button id="btnNovaDisciplina" class="btn-buscar" type="button">
+            + Cadastrar Disciplina
+        </button>
+
+        <br><br>
+
+        <div class="filtro-grupo">
+            <label>Ano</label>
+            <select id="filtroSerieDisciplina">
+                <option value="">Todos os anos</option>
+                <option value="1">1º Ano</option>
+                <option value="2">2º Ano</option>
+                <option value="3">3º Ano</option>
+            </select>
+        </div>
+
+        <br>
+
+        <div class="card-tabela">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Disciplina</th>
+                        <th>Professor</th>
+                        <th>Curso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyDisciplinas"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-disciplina">
+    <tr>
+        <td data-campo="idDisciplina"></td>
+        <td data-campo="nomeDisciplina"></td>
+        <td data-campo="professores"></td>
+        <td data-campo="nomeCurso"></td>
+        <td>
+            <button class="btn-buscar btnEditarDisciplina" type="button">Editar</button>
+            <button class="btn-excluir btnExcluirDisciplina" type="button">Excluir</button>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-form-disciplina">
+
+    <div class="card-notas">
+
+        <h2>Cadastrar Disciplina</h2>
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+                <label>ID Disciplina</label>
+                <input id="idDisciplina" type="number" min="1">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Nome da Disciplina</label>
+                <input id="nomeDisciplina" type="text">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Curso</label>
+                <select id="cursoDisciplina">
+                    <option value="">Selecione um curso</option>
+                </select>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="filtro-grupo">
+
+            <label>Professores e turmas</label>
+
+            <p style="margin-top:6px;margin-bottom:12px;color:#666;">
+                Selecione um professor e depois marque todas as turmas em que ele leciona.
+                Só aparecem professores do seu curso. Para incluir um professor de outro curso,
+                use "Adicionar professor existente" na tela de Professores.
+            </p>
+
+            <div id="listaProfessoresTurmas"></div>
+
+        </div>
+
+        <br>
+
+        <button id="btnSalvarDisciplina" class="btn-salvar" type="button">Salvar Disciplina</button>
+        <button id="btnCancelarDisciplina" class="btn-buscar" type="button">Cancelar</button>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-bloco-professor-disciplina">
+
+    <div
+        class="bloco-professor-disciplina"
+        style="border:1px solid #ddd;border-radius:8px;padding:14px;margin-bottom:12px;background:#fafafa;"
+    >
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+
+            <input type="checkbox" class="checkProfessorDisciplina">
+
+            <strong data-campo="nome"></strong>
+
+            <span style="color:#777;font-size:13px;" data-anexar="registro">Registro:</span>
+
+        </div>
+
+        <div class="turmas-professor-disciplina" style="display:none;padding-left:28px;">
+
+            <div style="font-weight:600;margin-bottom:8px;">Turmas:</div>
+
+            <div class="lista-turmas-professor"></div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-checkbox-turma">
+
+    <label class="chip-check">
+
+        <input type="checkbox" class="checkTurmaProfessorDisciplina">
+
+        <span data-campo="nomeTurma"></span>
+
+    </label>
+
+</template>
+
+
+<template id="tpl-editar-disciplina">
+
+    <div class="card-notas">
+
+        <h2>Editar Disciplina</h2>
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+                <label>ID Disciplina</label>
+                <input id="idDisciplina" type="number" disabled>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Nome da Disciplina</label>
+                <input id="nomeDisciplina" type="text">
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Curso</label>
+                <input id="nomeCursoDisciplina" type="text" disabled>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="filtro-grupo">
+
+            <label>Professores e turmas</label>
+
+            <table class="tabela-notas" style="margin-top:8px;">
+
+                <thead>
+                    <tr>
+                        <th style="width:40px;"></th>
+                        <th>Professor</th>
+                        <th>Turmas</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyProfessoresTurmas"></tbody>
+
+            </table>
+
+        </div>
+
+        <br>
+
+        <button id="btnSalvarDisciplina" class="btn-salvar" type="button">Salvar Alterações</button>
+        <button id="btnCancelarDisciplina" class="btn-buscar" type="button">Cancelar</button>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-professor-turmas">
+    <tr>
+        <td>
+            <input type="checkbox" class="checkProfessorDisciplina">
+        </td>
+        <td data-campo="nome"></td>
+        <td>
+            <div class="containerTurmasProfessor"></div>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-linha-turma-professor">
+    <div class="linhaTurmaProfessor">
+
+        <select class="selectTurmaProfessorDisciplina">
+            <option value="">Selecione a turma</option>
+        </select>
+
+        <button type="button" class="btnExcluirTurmaProfessor" title="Remover turma">×</button>
+
+    </div>
+</template>
+
+
+<template id="tpl-botao-adicionar-turma">
+    <button type="button" class="btnAdicionarTurmaProfessor">
+        + Adicionar turma
+    </button>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     CURSOS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-lista-cursos">
+
+    <div class="card-notas">
+
+        <h2>
+            Gerenciamento de Cursos
+        </h2>
+
+
+        <button id="btnNovoCurso" class="btn-buscar" type="button">
+            + Cadastrar Curso
+        </button>
+
+
+        <br><br>
+
+
+        <div id="formCurso"></div>
+
+
+        <br>
+
+
+        <div class="card-tabela">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Curso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyCursos"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-curso">
+    <tr>
+        <td data-campo="idCurso"></td>
+        <td data-campo="nomeCurso"></td>
+        <td>
+            <button class="btn-buscar btnEditarCurso" type="button">Editar</button>
+            <button class="btn-excluir btnExcluirCurso" type="button">Excluir</button>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-form-curso">
+
+    <div class="card-formulario">
+
+        <h2>
+            Cadastrar Curso
+        </h2>
+
+
+        <div class="filtro-row">
+
+            <div class="filtro-grupo">
+
+                <label>
+                    Nome do Curso
+                </label>
+
+                <input
+                    id="nomeCurso"
+                    type="text"
+                    placeholder="Ex.: Desenvolvimento de Sistemas"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="acoes-formulario">
+
+            <button id="btnSalvarCurso" class="btn-salvar" type="button">
+                Salvar Curso
+            </button>
+
+            <button id="btnCancelarCurso" class="btn-cancelar" type="button">
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-editar-curso">
+
+    <hr>
+
+    <h3>
+        Editar Curso
+    </h3>
+
+
+    <div class="filtro-row">
+
+        <div class="filtro-grupo">
+            <label>ID Curso</label>
+            <input id="editIdCurso" type="number" disabled>
+        </div>
+
+        <div class="filtro-grupo">
+            <label>Nome do Curso</label>
+            <input id="editNomeCurso" type="text">
+        </div>
+
+    </div>
+
+
+    <button id="btnSalvarEdicaoCurso" class="btn-salvar" type="button">
+        Salvar Alterações
+    </button>
+
+    <button id="btnCancelarEdicaoCurso" class="btn-buscar" type="button">
+        Cancelar
+    </button>
+
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     ALUNOS
+--------------------------------------------------------------------- -->
+
+<template id="tpl-lista-alunos">
+
+    <div class="card-notas">
+
+        <h2>Gerenciamento de Alunos</h2>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+                <button id="btnImportarAluno" class="btn-buscar" type="button">
+                    Importar CSV
+                </button>
+
+                <button id="btnCadastrarAluno" class="btn-buscar" type="button">
+                    + Cadastrar aluno
+                </button>
+
+                <button id="btnLimparAlunos" class="btn-excluir" type="button">
+                    Limpar alunos
+                </button>
+
+            </div>
+
+            <div style="display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap;">
+
+                <div>
+
+                    <label for="filtroTurmaAluno" style="display:block; font-weight:bold; margin-bottom:6px;">
+                        Filtrar por turma
+                    </label>
+
+                    <select
+                        id="filtroTurmaAluno"
+                        style="min-width:190px; height:40px; padding:0 12px; border:1px solid #ccc; border-radius:6px; background:#fff; font-size:14px; cursor:pointer;"
+                    >
+                        <option value="">Todas as turmas</option>
+                    </select>
+
+                </div>
+
+                <button id="btnBuscarAlunos" class="btn-buscar" type="button" style="height:40px; padding:0 22px;">
+                    Buscar
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="card-tabela">
+
+            <table class="tabela-notas">
+
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Turma</th>
+                        <th>Disciplinas</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyAlunos"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-aluno">
+    <tr>
+        <td data-campo="matricula"></td>
+        <td data-campo="nome"></td>
+        <td data-campo="email" data-padrao="-"></td>
+        <td data-campo="turma" data-padrao="-"></td>
+        <td data-campo="disciplinas" data-padrao="-"></td>
+        <td>
+            <button class="btn-buscar btnEditarAluno" type="button">Editar</button>
+            <button class="btn-excluir btnExcluirAluno" type="button">Excluir</button>
+        </td>
+    </tr>
+</template>
+
+
+<template id="tpl-editar-aluno">
+
+    <div class="card-editar-aluno">
+
+        <div class="titulo-editar-aluno">
+
+            <h2>
+                Editar Aluno
+            </h2>
+
+            <p>
+                Atualize os dados cadastrais do aluno.
+            </p>
+
+        </div>
+
+
+        <div class="form-editar-aluno">
+
+            <div class="campo-editar">
+                <label>Matrícula</label>
+                <input id="matriculaAluno" readonly>
+            </div>
+
+            <div class="campo-editar">
+                <label>Nome</label>
+                <input id="nomeAluno">
+            </div>
+
+            <div class="campo-editar campo-largo">
+                <label>Email</label>
+                <input id="emailAluno" type="email">
+            </div>
+
+            <div class="campo-editar">
+                <label>Senha</label>
+                <input
+                    id="senhaAluno"
+                    type="password"
+                    placeholder="Deixe vazio para manter a senha atual"
+                >
+            </div>
+
+            <div class="campo-editar">
+                <label>Telefone</label>
+                <input id="telefoneAluno">
+            </div>
+
+            <div class="campo-editar">
+
+                <label>Curso</label>
+
+                <select id="cursoAluno"></select>
+
+                <small
+                    id="avisoCursoAluno"
+                    style="display:block; margin-top:6px; color:#6b7280; font-size:12px;"
+                ></small>
+
+            </div>
+
+            <div class="campo-editar">
+                <label>Turma</label>
+                <select id="turmaAluno"></select>
+            </div>
+
+            <div class="campo-editar">
+                <label>Ano</label>
+                <input id="anoAluno" type="number">
+            </div>
+
+        </div>
+
+
+        <div class="acoes-editar-aluno">
+
+            <button id="btnCancelarAluno" class="btn-cancelar-aluno" type="button">
+                Cancelar
+            </button>
+
+            <button id="btnSalvarAluno" class="btn-salvar-aluno" type="button">
+                Salvar alterações
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-form-cadastro-aluno">
+
+    <div class="card-editar-aluno">
+
+        <div class="titulo-editar-aluno">
+
+            <h2>
+                Cadastrar Aluno
+            </h2>
+
+            <p>
+                Preencha os dados e marque as disciplinas que o aluno vai cursar.
+            </p>
+
+        </div>
+
+
+        <div class="form-editar-aluno">
+
+            <div class="campo-editar">
+                <label>Matrícula</label>
+                <input id="cadMatriculaAluno" type="number" min="1">
+            </div>
+
+            <div class="campo-editar">
+                <label>Nome</label>
+                <input id="cadNomeAluno" type="text">
+            </div>
+
+            <div class="campo-editar campo-largo">
+                <label>Email</label>
+                <input id="cadEmailAluno" type="email">
+            </div>
+
+            <div class="campo-editar">
+                <label>Senha</label>
+                <input id="cadSenhaAluno" type="password" placeholder="Mínimo de 8 caracteres" autocomplete="new-password">
+            </div>
+
+            <div class="campo-editar">
+                <label>Telefone</label>
+                <input id="cadTelefoneAluno" type="text">
+            </div>
+
+            <div class="campo-editar">
+                <label>Turma</label>
+                <select id="cadTurmaAluno">
+                    <option value="">Selecione a turma</option>
+                </select>
+            </div>
+
+            <div class="campo-editar">
+                <label>Ano</label>
+                <input id="cadAnoAluno" type="number">
+            </div>
+
+            <div class="campo-editar campo-largo">
+
+                <label>
+                    Disciplinas
+                    <small>(marque todas as disciplinas do ano da turma)</small>
+                </label>
+
+                <label
+                    id="rotuloMarcarTodasDisciplinas"
+                    class="chip-check chip-check-todas"
+                    style="display:none;"
+                >
+                    <input type="checkbox" id="cadMarcarTodasDisciplinas">
+                    Marcar todas
+                </label>
+
+                <div
+                    id="listaDisciplinasCadastroAluno"
+                    style="display:flex; flex-wrap:wrap; gap:8px; padding:12px; border:1px solid #d1d5db; border-radius:8px; background:#fafafa;"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="acoes-editar-aluno">
+
+            <button id="btnCancelarCadastroAluno" class="btn-cancelar-aluno" type="button">
+                Cancelar
+            </button>
+
+            <button id="btnSalvarCadastroAluno" class="btn-salvar-aluno" type="button">
+                Cadastrar aluno
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-checkbox-disciplina-aluno">
+
+    <label class="chip-check">
+
+        <input type="checkbox" class="checkDisciplinaCadastroAluno">
+
+        <span data-campo="nomeDisciplina"></span>
+
+    </label>
+
+</template>
+
+
+<template id="tpl-linha-previa-aluno">
+    <tr>
+        <td data-campo="matricula"></td>
+        <td data-campo="nome"></td>
+        <td data-campo="email"></td>
+        <td data-campo="curso"></td>
+        <td data-campo="turma"></td>
+        <td data-campo="ano"></td>
+        <td data-campo="disciplinas" data-padrao="-"></td>
+    </tr>
+</template>
+
+
+<template id="tpl-modal-importacao">
+
+    <div id="modalImportacaoAlunos" class="modal-overlay">
+
+        <div class="modal-conteudo">
+
+            <h2>
+                Importar Alunos via CSV
+            </h2>
+
+            <p>
+                <span data-campo="quantidade"></span>
+                registro(s) encontrado(s).
+                Confira antes de confirmar:
+            </p>
+
+
+            <div class="card-tabela" style="max-height:300px; overflow:auto;">
+
+                <table class="tabela-notas">
+
+                    <thead>
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Curso</th>
+                            <th>Turma</th>
+                            <th>Ano</th>
+                            <th>Disciplinas</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tbodyPreviaImportacao"></tbody>
+
+                </table>
+
+            </div>
+
+
+            <div id="resultadoCSV" style="margin-top:12px;"></div>
+
+
+            <div class="acoes-editar-aluno" style="margin-top:16px;">
+
+                <button id="btnCancelarImportacao" class="btn-cancelar-aluno" type="button">
+                    Cancelar
+                </button>
+
+                <button id="btnConfirmarImportacao" class="btn-salvar-aluno" type="button">
+                    Importar alunos
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-modal-limpar-alunos">
+
+    <div id="modalLimparAlunos" class="modal-overlay">
+
+        <div class="modal-conteudo">
+
+            <div class="modal-cabecalho">
+
+                <h2>
+                    Limpar alunos
+                </h2>
+
+                <p>
+                    Preparar o sistema para um novo ano letivo
+                </p>
+
+            </div>
+
+
+            <div class="modal-aviso">
+
+                <strong>
+                    Atenção
+                </strong>
+
+                <p>
+                    Esta ação irá remover todos os alunos
+                    do curso que você coordena.
+                </p>
+
+                <p>
+                    Professores, cursos, disciplinas e turmas
+                    permanecerão cadastrados.
+                </p>
+
+                <p>
+                    <strong>
+                        Essa operação deve ser utilizada somente
+                        ao iniciar um novo ano letivo.
+                    </strong>
+                </p>
+
+            </div>
+
+
+            <div class="campo-editar">
+
+                <label for="senhaLimparAlunos">
+                    Confirme sua senha de coordenador
+                </label>
+
+                <input
+                    id="senhaLimparAlunos"
+                    type="password"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+
+            <div id="erroLimparAlunos" class="erro-modal"></div>
+
+
+            <div class="acoes-editar-aluno">
+
+                <button id="btnCancelarLimparAlunos" class="btn-cancelar-aluno" type="button">
+                    Cancelar
+                </button>
+
+                <button id="btnConfirmarLimparAlunos" class="btn-salvar-aluno" type="button">
+                    Confirmar limpeza
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     HISTÓRICO DO COORDENADOR
+--------------------------------------------------------------------- -->
+
+<template id="tpl-historico">
+
+    <div class="card-notas card-historico">
+
+        <div class="cabecalho-historico">
+
+            <div class="icone-historico">
+
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C10.3 2 9 3.3 9 5v.6C6.1 6.6 4 9.3 4 12.5V17l-1.6 2.1c-.4.5 0 1.2.6 1.2h18c.6 0 1-.7.6-1.2L20 17v-4.5c0-3.2-2.1-5.9-5-6.9V5c0-1.7-1.3-3-3-3z" fill="currentColor"/>
+                    <path d="M9.5 20.5c.3 1 1.3 1.7 2.5 1.7s2.2-.7 2.5-1.7h-5z" fill="currentColor"/>
+                </svg>
+
+            </div>
+
+            <div>
+                <h2>Histórico do Coordenador</h2>
+                <p>Registro de ações administrativas realizadas no sistema</p>
+            </div>
+
+        </div>
+
+        <div class="resumo-historico" data-anexar="rotulo">
+            <strong data-campo="total"></strong>
+        </div>
+
+        <div class="filtro-historico" id="grupoCursoHistorico" style="display: none;">
+            <label for="selectCursoHistorico">Curso</label>
+            <select id="selectCursoHistorico"></select>
+        </div>
+
+        <div class="card-tabela tabela-historico-wrapper">
+
+            <table class="tabela-notas tabela-historico">
+
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Coordenador</th>
+                        <th>Ação</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyHistoricoCoordenador"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-linha-historico">
+    <tr>
+        <td class="celula-data" data-campo="data"></td>
+        <td data-campo="nomeProfessor" data-padrao="-"></td>
+        <td>
+            <span class="badge-acao" data-campo="acao" data-padrao="-"></span>
+        </td>
+        <td class="celula-descricao" data-campo="descricao" data-padrao="-"></td>
+    </tr>
+</template>
+
+
+<template id="tpl-historico-vazio">
+    <tr>
+        <td colspan="4" class="historico-vazio">
+            <div class="historico-vazio-conteudo">
+                <span class="historico-vazio-icone">🗂️</span>
+                <span>Nenhuma ação registrada até o momento.</span>
+            </div>
+        </td>
+    </tr>
+</template>
+
+
+<!-- ---------------------------------------------------------------------
+     CONTESTAÇÕES
+     Status válidos: Em análise | Alterado | Recusada
+--------------------------------------------------------------------- -->
+
+<template id="tpl-modal-contestacoes">
+
+    <div id="modalContestacoes" class="modal-contestacoes-overlay">
+
+        <div class="modal-contestacoes">
+
+            <button
+                type="button"
+                class="modal-contestacoes-fechar"
+                aria-label="Fechar"
+            >
+                ×
+            </button>
+
+            <h2>
+                Contestações de Notas
+            </h2>
+
+            <p class="modal-contestacoes-subtitulo">
+                Solicitações dos alunos para suas disciplinas
+            </p>
+
+            <div class="lista-contestacoes"></div>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<template id="tpl-card-contestacao">
+
+    <div class="contestacao-card">
+
+        <div class="contestacao-topo">
+
+            <div>
+
+                <strong data-campo="alunoNome"></strong>
+
+                <span data-anexar="matricula">Matrícula:</span>
+
+            </div>
+
+            <span class="status-contestacao" data-campo="status"></span>
+
+        </div>
+
+
+        <div class="contestacao-info">
+
+            <div data-anexar="nomeTurma">
+                <strong>Turma:</strong>
+            </div>
+
+            <div data-anexar="nomeDisciplina">
+                <strong>Disciplina:</strong>
+            </div>
+
+            <div data-anexar="bimestre">
+                <strong>Bimestre:</strong>
+            </div>
+
+            <div data-anexar="data">
+                <strong>Data:</strong>
+            </div>
+
+            <div data-anexar="notaAnterior">
+                <strong>Nota contestada:</strong>
+            </div>
+
+            <div data-anexar="notaAtual" data-bloco="nota-atual">
+                <strong>Nota atual:</strong>
+            </div>
+
+        </div>
+
+
+        <div class="contestacao-motivo">
+
+            <strong>Motivo da contestação:</strong>
+
+            <p data-campo="motivo"></p>
+
+        </div>
+
+
+        <div class="contestacao-resposta">
+
+            <strong>Sua resposta:</strong>
+
+            <p data-campo="resposta"></p>
+
+        </div>
+
+
+        <div class="contestacao-acoes">
+
+            <button type="button" class="btn-aprovar" data-status="Alterado">
+                Alterar Nota
+            </button>
+
+            <button type="button" class="btn-recusar" data-status="Recusada">
+                Recusar
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<link rel="stylesheet" href="popup.css">
+
+<script src="popup.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script
+    type="module"
+    src="coordenador.js"
+></script>
+
+<script type="module" src="contestacoesBadge.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Login — GATA · Univap</title>
+
+<link
+    rel="icon"
+    href="assets/logo-univap.png"
+>
+
+<link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"
+    rel="stylesheet"
+>
+
+<style>
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    :root {
+        --azul: #1a3a8a;
+        --azul-medio: #2e58a5;
+        --azul-claro: #eef2f9;
+        --cinza: #6b7280;
+        --borda: #d1d5db;
+    }
+
+    body {
+        font-family: 'Lato', sans-serif;
+        background: #fff;
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* =====================================================
+       PAINEL ESQUERDO
+    ===================================================== */
+
+    .painel-esquerdo {
+        background: var(--azul);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 48px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .painel-esquerdo::before,
+    .painel-esquerdo::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, .07);
+    }
+
+    .painel-esquerdo::before {
+        width: 420px;
+        height: 420px;
+        top: -120px;
+        left: -120px;
+    }
+
+    .painel-esquerdo::after {
+        width: 280px;
+        height: 280px;
+        bottom: -80px;
+        right: -80px;
+    }
+
+    .icone-wrap {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-bottom: 36px;
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+    }
+
+    .icone-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .univap-logo {
+        display: flex;
+        align-items: baseline;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .univap-logo span {
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -.01em;
+    }
+
+    .univap-sub {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .divider-esq {
+        width: 32px;
+        height: 1px;
+        background: rgba(255, 255, 255, .2);
+        margin: 22px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .painel-frase {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        text-align: center;
+        line-height: 1.8;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* =====================================================
+       PAINEL DIREITO
+    ===================================================== */
+
+    .painel-direito {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 64px;
+        background: #fff;
+    }
+
+    .form-wrapper {
+        width: 100%;
+        max-width: 360px;
+        animation: subir .4s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    @keyframes subir {
+
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    }
+
+    .form-titulo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--azul);
+        margin-bottom: 4px;
+    }
+
+    .form-sub {
+        font-size: .83rem;
+        color: var(--cinza);
+        margin-bottom: 28px;
+    }
+
+    /* =====================================================
+       TABS
+    ===================================================== */
+
+    .tabs {
+        display: flex;
+        gap: 3px;
+        background: var(--azul-claro);
+        padding: 4px;
+        border-radius: 10px;
+        margin-bottom: 26px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 9px 0;
+        border: none;
+        background: transparent;
+        font-family: 'Lato', sans-serif;
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--cinza);
+        border-radius: 7px;
+        cursor: pointer;
+        transition: all .2s;
+        letter-spacing: .03em;
+    }
+
+    .tab-btn.ativo {
+        background: var(--azul);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(26, 58, 138, .22);
+    }
+
+    /* =====================================================
+       CAMPOS
+    ===================================================== */
+
+    .grupo {
+        margin-bottom: 16px;
+    }
+
+    .grupo label {
+        display: block;
+        font-size: .68rem;
+        font-weight: 700;
+        color: #374151;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .campo-wrapper {
+        position: relative;
+    }
+
+    .campo-wrapper svg {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
+
+    .grupo input {
+        width: 100%;
+        padding: 11px 14px 11px 40px;
+        border: 1.5px solid var(--borda);
+        border-radius: 9px;
+        font-family: 'Lato', sans-serif;
+        font-size: .9rem;
+        color: #111827;
+        background: #fafafa;
+        transition: border-color .2s, box-shadow .2s;
+        outline: none;
+    }
+
+    .grupo input:focus {
+        border-color: var(--azul-medio);
+        box-shadow: 0 0 0 3px rgba(46, 88, 165, .1);
+        background: #fff;
+    }
+
+    /* =====================================================
+       ERRO
+    ===================================================== */
+
+    .erro-box {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        background: #fff0f0;
+        color: #991b1b;
+        border-left: 3px solid #dc2626;
+        border-radius: 7px;
+        padding: 10px 13px;
+        font-size: .82rem;
+        font-weight: 600;
+        margin-bottom: 18px;
+    }
+
+    .erro-box.visivel {
+        display: flex;
+    }
+
+    /* =====================================================
+       BOTÃO
+    ===================================================== */
+
+    .btn-entrar {
+        width: 100%;
+        padding: 13px;
+        background: var(--azul);
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        font-family: 'Lato', sans-serif;
+        font-size: .92rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        cursor: pointer;
+        transition: background .2s, transform .1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .btn-entrar:hover {
+        background: #162f70;
+    }
+
+    .btn-entrar:active {
+        transform: scale(.98);
+    }
+
+    .btn-entrar.carregando {
+        opacity: .7;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, .3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: girar .6s linear infinite;
+    }
+
+    .btn-entrar.carregando .spinner {
+        display: block;
+    }
+
+    .btn-entrar.carregando .label-btn {
+        display: none;
+    }
+
+    @keyframes girar {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* =====================================================
+       RODAPÉ
+    ===================================================== */
+
+    .rodape-form {
+        margin-top: 26px;
+        text-align: center;
+        font-size: .72rem;
+        color: #9ca3af;
+    }
+
+    .rodape-form span {
+        color: var(--azul-medio);
+        font-weight: 700;
+    }
+
+    /* =====================================================
+       RESPONSIVO
+    ===================================================== */
+
+    @media (max-width: 720px) {
+
+        body {
+            grid-template-columns: 1fr;
+        }
+
+        .painel-esquerdo {
+            display: none;
+        }
+
+        .painel-direito {
+            padding: 48px 28px;
+        }
+
+    }
+
+</style>    
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     PAINEL ESQUERDO
+===================================================== -->
+
+<div class="painel-esquerdo">
+
+    <div class="icone-wrap">
+
+        <img
+            src="assets/logo-univap.png"
+            alt="Ícone Univap"
+        >
+
+    </div>
+
+    <div class="univap-logo">
+
+        <span>Univap</span>
+
+    </div>
+
+    <div class="univap-sub">
+        Universidade do Vale do Paraíba
+    </div>
+
+    <div class="divider-esq"></div>
+
+    <div class="painel-frase">
+
+        Sistema de Gestão Acadêmica de Alunos, Turmas e Avaliações
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PAINEL DIREITO
+===================================================== -->
+
+<div class="painel-direito">
+
+    <div class="form-wrapper">
+
+        <p class="form-titulo">
+            Bem-vindo
+        </p>
+
+        <p class="form-sub">
+            Faça login para acessar o sistema
+        </p>
+
+
+        <!-- =================================================
+             TABS
+        ================================================= -->
+
+        <div class="tabs">
+
+        <button
+            type="button"
+            class="tab-btn ativo"
+            id="tabAluno"
+            >
+                Aluno
+            </button>
+
+            <button
+                type="button"
+                class="tab-btn"
+                id="tabProfessor"
+            >
+                Professor
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             ERRO
+        ================================================= -->
+
+        <div
+            class="erro-box"
+            id="erroBox"
+        >
+
+            <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+            >
+
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                />
+
+                <line
+                    x1="12"
+                    y1="8"
+                    x2="12"
+                    y2="12"
+                />
+
+                <line
+                    x1="12"
+                    y1="16"
+                    x2="12.01"
+                    y2="16"
+                />
+
+            </svg>
+
+            <span id="erroMsg"></span>
+
+        </div>
+
+
+        <!-- =================================================
+             IDENTIFICADOR
+        ================================================= -->
+
+        <div class="grupo">
+
+            <label for="inputIdentificador" id="labelIdentificador">
+                Matrícula
+            </label>
+
+            <div class="campo-wrapper">
+
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+
+                    <path
+                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                    />
+
+                    <circle
+                        cx="12"
+                        cy="7"
+                        r="4"
+                    />
+
+                </svg>
+
+                <input
+                    type="text"
+                    id="inputIdentificador"
+                    placeholder="Ex.: 20250001"
+                    autocomplete="username"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SENHA
+        ================================================= -->
+
+        <div class="grupo">
+
+            <label for="inputSenha">
+                Senha
+            </label>
+
+            <div class="campo-wrapper">
+
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+
+                    <rect
+                        x="3"
+                        y="11"
+                        width="18"
+                        height="11"
+                        rx="2"
+                    />
+
+                    <path
+                        d="M7 11V7a5 5 0 0 1 10 0v4"
+                    />
+
+                </svg>
+
+                <input
+                    type="password"
+                    id="inputSenha"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             BOTÃO
+        ================================================= -->
+
+        <button
+            type="button"
+            class="btn-entrar"
+            id="btnEntrar"
+        >
+            <div class="spinner"></div>
+
+            <span class="label-btn">
+                Entrar
+            </span>
+        </button>
+
+
+        <!-- =================================================
+             RODAPÉ
+        ================================================= -->
+
+        <div class="rodape-form">
+
+            GATA &nbsp;·&nbsp;
+
+            <span>
+                Univap
+            </span>
+
+            &nbsp;·&nbsp;
+
+            2026
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script
+    type="module"
+    src="login.js"
+></script>
+
+
+</body>
+
+</html>

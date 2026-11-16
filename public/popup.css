@@ -1,0 +1,261 @@
+/* =========================================================
+   POPUP.CSS
+   Estilos das funções em popup.js
+========================================================= */
+
+
+/* =========================================================
+   POPUP DE MENSAGEM (erro / sucesso / info)
+========================================================= */
+
+.popup-mensagem {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    min-width: 320px;
+    max-width: 420px;
+
+    padding: 16px 18px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    border-left: 4px solid var(--popup-cor, #1a3a8a);
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+    color: #374151;
+    font-family: inherit;
+
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.popup-mensagem.popup-visivel {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.popup-mensagem.popup-erro {
+    --popup-cor: #dc2626;
+}
+
+.popup-mensagem.popup-sucesso {
+    --popup-cor: #1a3a8a;
+}
+
+.popup-mensagem.popup-info {
+    --popup-cor: #64748b;
+}
+
+.popup-icone {
+    flex-shrink: 0;
+
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--popup-cor, #1a3a8a);
+    color: #fff;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+.popup-conteudo {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.popup-conteudo strong {
+    font-size: 14px;
+    color: #1a3a8a;
+}
+
+.popup-conteudo span {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.popup-fechar {
+    flex-shrink: 0;
+
+    background: none;
+    border: none;
+
+    color: #9ca3af;
+    font-size: 18px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    padding: 0;
+}
+
+.popup-fechar:hover {
+    color: #374151;
+}
+
+@media (max-width: 480px) {
+
+    .popup-mensagem {
+        left: 16px;
+        right: 16px;
+        min-width: 0;
+        max-width: none;
+    }
+
+}
+
+
+/* =========================================================
+   POPUP DE CONFIRMAÇÃO
+========================================================= */
+
+.popup-confirmar-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.popup-confirmar-overlay.popup-confirmar-visivel {
+    opacity: 1;
+}
+
+.popup-confirmar-caixa {
+    background: #ffffff;
+    border-radius: 14px;
+
+    padding: 28px 26px 22px;
+
+    max-width: 400px;
+    width: 90%;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+
+    color: #374151;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    transform: scale(0.92);
+    opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.popup-confirmar-overlay.popup-confirmar-visivel .popup-confirmar-caixa {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.popup-confirmar-icone {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #fee2e2;
+    color: #dc2626;
+
+    font-size: 24px;
+    font-weight: 700;
+
+    margin-bottom: 16px;
+}
+
+.popup-confirmar-texto strong {
+    display: block;
+    font-size: 17px;
+    color: #1a3a8a;
+    margin-bottom: 8px;
+}
+
+.popup-confirmar-texto p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.55;
+    font-size: 14px;
+}
+
+.popup-confirmar-acoes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+
+    margin-top: 24px;
+    width: 100%;
+}
+
+.popup-confirmar-btn {
+    flex: 1;
+
+    padding: 11px 0;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.popup-confirmar-btn:active {
+    transform: scale(0.97);
+}
+
+.popup-confirmar-btn-cancelar {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.popup-confirmar-btn-cancelar:hover {
+    background: #e5e7eb;
+}
+
+.popup-confirmar-btn-confirmar {
+    background: #dc2626;
+    color: #fff;
+}
+
+.popup-confirmar-btn-confirmar:hover {
+    background: #b91c1c;
+}
